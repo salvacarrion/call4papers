@@ -1,10 +1,15 @@
-# call4papers
-Get a CSV with topic-related conferences along with their CORE rank, their deadlines and more
+# Call4Papers
 
+Get a CSV with topic-related conferences along with their CORE rank, deadlines and more
+
+## Requirements
+
+- Python +3.6
 
 ## Installation
 
 ```
+pip install -e .
 ```
 
 ## Usage
@@ -19,5 +24,5 @@ call4papers --setup "nlp"
 **Custom keywords, blacklist and ratings:**
 
 ```
-call4papers --setup "nlp"
+call4papers --keywords "linguistics, translation, learning" --blacklist "AAAA,BBBB" --ratings "A*,A,B"
 ```

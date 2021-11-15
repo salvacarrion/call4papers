@@ -181,14 +181,14 @@ def search4papers(output_file, keywords, blacklist, ratings, ignore_wikicfp, onl
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--setup', type=str, default=None, choices=list(DEFAULT_SETUPS.keys()),
-                        help='Collection of base setups')
+                        help='Collection of default setups')
     parser.add_argument('--output_file', type=str, default="conferences.csv", help='Output file')
-    parser.add_argument('--keywords', type=str, default=None, help='List of words, comma-separated')
-    parser.add_argument('--blacklist', type=str, default=None, help='List of words, comma-separated')
-    parser.add_argument('--ratings', type=str, default=None, help='List of words, comma-separated')
-    parser.add_argument('--force_download', action='store_false', help='Force download, ignoring cache files.')
-    parser.add_argument('--ignore_wikicfp', action='store_false', help='Ignore Wikicfp information')
-    parser.add_argument('--only_next_year', action='store_false', help='Get information only about next year')
+    parser.add_argument('--keywords', type=str, default=None, help='List of words. Comma-separated.')
+    parser.add_argument('--blacklist', type=str, default=None, help='List of words (conf. acronyms). Comma-separated.')
+    parser.add_argument('--ratings', type=str, default=None, help='List of words (A*,A,B,C,...). Comma-separated.')
+    parser.add_argument('--force_download', action='store_true', help='Force download, ignoring cache files.')
+    parser.add_argument('--ignore_wikicfp', action='store_true', help='Ignore Wikicfp information.')
+    parser.add_argument('--only_next_year', action='store_true', help='Get information only about next year.')
 
     # Pars vars
     args = parser.parse_args()
@@ -199,9 +199,9 @@ def main():
         blacklist = DEFAULT_SETUPS[args.setup]["blacklist"]
         ratings = DEFAULT_SETUPS[args.setup]["ratings"]
     else:
-        keywords = [] if args.keywords is None else args.keywords.split(",")
-        blacklist = [] if args.blacklist is None else args.blacklist.split(",")
-        ratings = [] if args.ratings is None else args.ratings.split(",")
+        keywords = {} if args.keywords is None else set(args.keywords.split(","))
+        blacklist = {} if args.blacklist is None else set(args.blacklist.split(","))
+        ratings = {} if args.ratings is None else set(args.ratings.split(","))
 
     # Run
     search4papers(force_download=args.force_download, output_file=args.output_file,
