@@ -9,7 +9,7 @@ import pandas as pd
 from thefuzz import process
 from tqdm import tqdm
 
-from constants import DEFAULT_COLUMNS, DEFAULT_SETUPS
+from call4papers.constants import DEFAULT_COLUMNS, DEFAULT_SETUPS
 
 
 def get_conferences(force_download, cache_dir="."):

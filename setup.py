@@ -18,7 +18,7 @@ setup(name='call4papers',
       zip_safe=False,
       entry_points={
           'console_scripts': [
-              'call4papers = call4papers:main'
+              'call4papers = call4papers.main:main'
           ]
       },
       )
