@@ -38,7 +38,7 @@ call4papers --keywords "linguistics, translation, learning" --blacklist "AAAA,BB
 You can simply edit the file ``call4papers/constants.py`` to add all the setups that you want.
 
 
-**More ptions:**
+**More options:**
 
 ```
 usage: main.py [-h] [--setup {nlp}] [--output_file OUTPUT_FILE]
