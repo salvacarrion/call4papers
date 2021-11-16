@@ -242,6 +242,9 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
     df_core = get_core_conferences(force_download=force_download, cache_dir=cache_dir)
     df_core = df_core.rename(columns={"Title": "CORE_title", "Acronym": "Acronym"})
 
+    # Normalize acronym
+    df_core["Acronym"] = df_core["Acronym"].apply(lambda x: str(x).strip().upper())  # Force uppercase
+
     # Add GGS information
     if not ignore_ggs:
         # Get GGS conferences
@@ -250,6 +253,9 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
         # Rename columns and remove index column
         df_ggs = df_ggs.rename(columns={"Title": "GGS_title", "Acronym": "Acronym"})
         df_ggs = df_ggs.drop([0], axis=1)
+
+        # Normalize acronym
+        df_ggs["Acronym"] = df_ggs["Acronym"].apply(lambda x: str(x).strip().upper())  # Force uppercase
 
         # Perform merge operation (JOIN)
         how = {"core": "left", "ggs": "right", "all": "outer"}
