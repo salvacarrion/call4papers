@@ -298,6 +298,7 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
         # Save file
         df.to_csv(output_file, index=False)
         print(f"File saved! ({os.path.abspath(output_file)})")
+        print(f"{len(df)} conferences found")
 
 
 def main():
