@@ -136,7 +136,7 @@ def get_deadlines(title, acronym, year='f', only_next_year=False):
 
 def search4papers(output_file, keywords, blacklist, ratings, ignore_wikicfp, only_next_year, force_download):
     # Create cache folder if it does not exists
-    cache_dir = os.path.join(".cache")
+    cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".cache"))
     p = Path(cache_dir)
     p.mkdir(parents=True, exist_ok=True)
 
