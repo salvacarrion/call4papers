@@ -32,34 +32,28 @@ def get_core_conferences(force_download, cache_dir="."):
         print("No cached file. The CORE download is about to start...")
         df = scrape_core_conferences(savepath=filename, core_code=core_code)
         print("CORE scraped!")
+
+    # Remove index and last two rows
+    df = df.drop(df.columns[[0, 7, 8, 9]], axis=1)
     return df
 
 
-def scrape_core_conferences(savepath, core_code, pages=100):
-    # core: 'all', CORE{YEAR}
-    tables = []
+def scrape_core_conferences(savepath, core_code):
+    url = f"http://portal.core.edu.au/conf-ranks/?search=&by=all&source={core_code}&sort=atitle&page=1&do=Export"
 
-    # Get COREs
-    print("Downloading conferences from 'portal.core.edu.au'...")
-    for i in tqdm(range(1, pages), total=pages):
-        try:
-            url = f"http://portal.core.edu.au/conf-ranks/?search=&by=acronym&source={core_code}&sort=arank&page={i}"
-            table_i = pd.read_html(url)
-            if table_i:
-                tables.append(table_i[0])
-        except HTTPError as e:
-            if i > 1 and e.code == 500:
-                print("No more pages to scrape")
-            else:
-                print(e)
-            break
+    # Download file
+    response = requests.get(url, allow_redirects=True)
+    if response.status_code != 200:
+        raise ConnectionError("Invalid request for CORE")
 
-    # Concat tables
-    df = pd.concat(tables)
+    # Save csv
+    with open(savepath, 'w') as f:
+        f.write("Index,Title,Acronym,Source,Rank,DBLP,hasData?,Primary FoR,Comments,Average Rating\n")
+        f.write(response.text)
+    print("File saved!")
 
-    # Save table
-    df.to_csv(savepath, index=False)
-    print(f"Cached file saved! ({os.path.abspath(savepath)})")
+    # Open file
+    df = pd.read_csv(savepath)
     return df
 
 
@@ -215,9 +209,16 @@ def prettify_csv(df, show_extra):
     df = df.rename(columns={"Rank": "CORE rank"})
 
     # Show minimal columns
-    if not show_extra:
-        columns = [c for c in MINIMAL_COLUMNS if c in set(df.columns)]
-        df = df[columns]
+    columns1 = [c for c in MINIMAL_COLUMNS if c in set(df.columns)]
+    if show_extra:
+        columns2 = list(set(df.columns).difference(set(columns1)))
+        columns1 = columns1 + columns2
+
+    # Apply column sort
+    df = df[columns1]
+
+    # Sort by Acronym
+    df = df.sort_values(by=['Acronym'])
     return df
 
 
@@ -242,7 +243,8 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
     df_core = get_core_conferences(force_download=force_download, cache_dir=cache_dir)
     df_core = df_core.rename(columns={"Title": "CORE_title", "Acronym": "Acronym"})
 
-    # Normalize acronym
+    # Normalize values
+    df_core["CORE_title"] = df_core["CORE_title"].apply(lambda x: str(x).strip())
     df_core["Acronym"] = df_core["Acronym"].apply(lambda x: str(x).strip().upper())  # Force uppercase
 
     # Add GGS information
@@ -252,9 +254,10 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
 
         # Rename columns and remove index column
         df_ggs = df_ggs.rename(columns={"Title": "GGS_title", "Acronym": "Acronym"})
-        df_ggs = df_ggs.drop([0], axis=1)
+        df_ggs = df_ggs.drop(df_ggs.columns[[0]], axis=1)
 
-        # Normalize acronym
+        # Normalize values
+        df_ggs["GGS_title"] = df_ggs["GGS_title"].apply(lambda x: str(x).strip())
         df_ggs["Acronym"] = df_ggs["Acronym"].apply(lambda x: str(x).strip().upper())  # Force uppercase
 
         # Perform merge operation (JOIN)
@@ -304,7 +307,7 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
         # Save file
         df.to_csv(output_file, index=False)
         print(f"File saved! ({os.path.abspath(output_file)})")
-        print(f"{len(df)} conferences found")
+        print(f"{len(set(df['Acronym']))} conferences found. ({len(df)} rows)")
 
 
 def main():
@@ -339,11 +342,11 @@ def main():
 
     # Show vars
     print("-"*80)
-    print(f"- Setup: {args.setup if args.setup else 'None' }")
-    print(f"- Keywords: {', '.join(keywords)}")
-    print(f"- Exclusion keywords: {', '.join(nokeywords)}")
-    print(f"- Blacklist (Acronyms): {', '.join(blacklist).upper()}")
-    print(f"- Ratings: {', '.join(ratings).upper()}")
+    print(f"- Setup: {args.setup.upper() if args.setup else 'None' }")
+    print(f"- Keywords: {', '.join(sorted(list(keywords))).lower()}")
+    print(f"- Exclusion keywords: {', '.join(sorted(list(nokeywords))).lower()}")
+    print(f"- Blacklist (Acronyms): {', '.join(sorted(list(blacklist))).upper()}")
+    print(f"- Ratings: {', '.join(sorted(list(ratings))).upper()}")
     print("-"*80)
 
     # Run
