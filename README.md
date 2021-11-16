@@ -1,6 +1,6 @@
 # Call4Papers
 
-Get a CSV with topic-related conferences along with their CORE rank, deadlines and more
+Get a CSV with topic-related conferences along with their CORE rank, GGS Class, deadlines and more.
 
 
 ## Requirements
@@ -41,10 +41,8 @@ You can simply edit the file ``call4papers/constants.py`` to add all the setups 
 **More options:**
 
 ```
-usage: main.py [-h] [--setup {nlp}] [--output_file OUTPUT_FILE]
-               [--keywords KEYWORDS] [--blacklist BLACKLIST]
-               [--ratings RATINGS] [--force_download] [--ignore_wikicfp]
-               [--only_next_year]
+usage: call4papers [-h] [--setup {nlp}] [--output_file OUTPUT_FILE] [--keywords KEYWORDS] [--blacklist BLACKLIST] [--ratings RATINGS] [--force_download]
+                   [--only_next_year] [--ignore_wikicfp] [--ignore_ggs] [--show-extra]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -56,8 +54,10 @@ optional arguments:
                         List of words (conf. acronyms). Comma-separated.
   --ratings RATINGS     List of words (A*,A,B,C,...). Comma-separated.
   --force_download      Force download, ignoring cache files.
-  --ignore_wikicfp      Ignore Wikicfp information.
   --only_next_year      Get information only about next year.
+  --ignore_wikicfp      Ignore information from Wikicfp.
+  --ignore_ggs          Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.
+  --show-extra          Show extra columns
 ```
 
 

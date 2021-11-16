@@ -4,8 +4,8 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(name='call4papers',
-      version='0.1',
-      description='Get a CSV with topic-related conferences along with their CORE rank, their deadlines and more',
+      version='0.2',
+      description='Get a CSV with topic-related conferences along with their CORE rank, GGS Class, deadlines and more.',
       url='https://github.com/salvacarrion/call4papers',
       author='Salva Carrión',
       license='MIT',

@@ -1,5 +1,4 @@
-DEFAULT_COLUMNS = ["Acronym",  "Title",  "Rank",  "deadline",  "when",  "where",  "DBLP",  "hasData?",
-                   "Primary FoR",  "Comments",  "Average Rating",  "Event year",  "Source"]
+MINIMAL_COLUMNS = ["Acronym",  "Title",  "CORE rank", "GGS Class",  "deadline",  "when",  "where"]
 
 DEFAULT_SETUPS = {
     "nlp": {

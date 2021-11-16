@@ -2,4 +2,7 @@ pandas
 tqdm
 thefuzz
 python-Levenshtein
+requests
+bs4
 lxml
+openpyxl
