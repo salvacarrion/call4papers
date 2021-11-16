@@ -8,8 +8,8 @@ DEFAULT_SETUPS = {
             "natural language",
             "artificial intelligence",
             "pattern recognition",
-            "machine learning"
-            "neural networks"
+            "machine learning",
+            "neural networks",
             "neural",
             "language",
             "learning",
@@ -30,8 +30,8 @@ DEFAULT_SETUPS = {
         "keywords": {
             "artificial intelligence",
             "pattern recognition",
-            "machine learning"
-            "neural networks"
+            "machine learning",
+            "neural networks",
             "neural",
             "learning",
         },

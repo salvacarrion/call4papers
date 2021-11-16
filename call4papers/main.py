@@ -331,6 +331,15 @@ def main():
         blacklist = {} if args.blacklist is None else set(args.blacklist.split(","))
         ratings = {} if args.ratings is None else set(args.ratings.split(","))
 
+    # Show vars
+    print("-"*80)
+    print(f"- Setup: {args.setup if args.setup else 'None' }")
+    print(f"- Keywords: {', '.join(keywords)}")
+    print(f"- Exclusion keywords: {', '.join(nokeywords)}")
+    print(f"- Blacklist (Acronyms): {', '.join(blacklist).upper()}")
+    print(f"- Ratings: {', '.join(ratings).upper()}")
+    print("-"*80)
+
     # Run
     search4papers(force_download=args.force_download, output_file=args.output_file,
                   keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings,
