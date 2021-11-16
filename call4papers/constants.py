@@ -14,7 +14,30 @@ DEFAULT_SETUPS = {
             "language",
             "learning",
         },
-        "ratings": {"A*", "A", "B", "C"},
+        "nokeywords": {
+            "object oriented",
+            "automata languages",
+            "compilers",
+            "programming languages",
+            "design languages",
+            "engineering languages",
+        },
+        "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "blacklist": {"cicling"},
+    },
+
+    "vision": {
+        "keywords": {
+            "artificial intelligence",
+            "pattern recognition",
+            "machine learning"
+            "neural networks"
+            "neural",
+            "learning",
+        },
+        "nokeywords": {
+        },
+        "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
+        "blacklist": {},
     }
 }

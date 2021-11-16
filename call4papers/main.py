@@ -1,4 +1,5 @@
 import os
+import math
 import argparse
 import datetime
 import requests
@@ -114,20 +115,41 @@ def scrape_ggs_conferences(savepath):
     return df
 
 
-def filter_conferences(df, keywords, blacklist, ratings):
+def filter_invalid_rows(df):
+    # Remove specific values
+    df = df[df["Title"].apply(lambda x: isinstance(x, str) and len(x) >= 2)]
+    df = df[df["Acronym"].apply(lambda x: isinstance(x, str) and len(x) >= 2)]
+    return df
+
+
+def filter_conferences(df, keywords, nokeywords, blacklist, ratings):
     # Filter by keywords
     if keywords:
         kw_filter = '|'.join(keywords).lower()
-        df = df[df['Title'].str.contains(kw_filter, case=False, regex=True)]
+        mask = df['Title'].str.contains(kw_filter, case=False, regex=True)
+        if "GGS_title" in df.columns:
+            mask = mask | df['GGS_title'].str.contains(kw_filter, case=False, regex=True)
+        df = df[mask]
 
-    # Filter by blacklist
+    # Filter by keywords
+    if nokeywords:
+        kw_filter = '|'.join(nokeywords).lower()
+        mask = df['Title'].str.contains(kw_filter, case=False, regex=True)
+        if "GGS_title" in df.columns:
+            mask = mask | df['GGS_title'].str.contains(kw_filter, case=False, regex=True)
+        df = df[~mask]
+
+    # Filter by acronym blacklist
     if blacklist:
         kw_filter = '|'.join(blacklist).lower()
         df = df[~df['Acronym'].str.contains(kw_filter, case=False, regex=True)]
 
     # Filter by rating
     if ratings:
-        df = df[df['Rank'].apply(lambda x: any(x.strip().upper() == rat.strip().upper() for rat in ratings))]
+        mask = df['Rank'].apply(lambda x: any(str(x).strip().upper() == str(rat).strip().upper() for rat in ratings))
+        if "GGS Class" in df.columns:
+            mask = mask | df['GGS Class'].apply(lambda x: any(str(x).strip().upper() == str(rat).strip().upper() for rat in ratings))
+        df = df[mask]
     return df
 
 
@@ -159,7 +181,6 @@ def get_deadlines(title, acronym, year='f', only_next_year=False):
 
     # Check if there is any table
     if df is not None:
-
         # Make first row header
         if set(df.iloc[0]) == {'Deadline', 'Event', 'Where', 'When'}:
             new_header = df.iloc[0]  # grab the first row for the header
@@ -200,8 +221,18 @@ def prettify_csv(df, show_extra):
     return df
 
 
-def search4papers(output_file, keywords, blacklist, ratings, ignore_wikicfp, ignore_ggs,
-                  only_next_year, force_download, show_extra):
+def normalize_title(title1, title2):
+    # Normalize titles
+    title1 = title1.strip() if isinstance(title1, str) and title1.strip() not in {"", "nan", "-"} else None
+    title2 = title2.strip() if isinstance(title2, str) and title2.strip() not in {"", "nan", "-"} else None
+
+    # Select title (title1 has preference, CORE)
+    title_normalized = title2 if not title1 and title2 else title1
+    return title_normalized
+
+
+def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_wikicfp, ignore_ggs,
+                  only_next_year, force_download, show_extra, ref_source):
     # Create cache folder if it does not exists
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".cache"))
     p = Path(cache_dir)
@@ -209,6 +240,7 @@ def search4papers(output_file, keywords, blacklist, ratings, ignore_wikicfp, ign
 
     # Get CORE conferences
     df_core = get_core_conferences(force_download=force_download, cache_dir=cache_dir)
+    df_core = df_core.rename(columns={"Title": "CORE_title", "Acronym": "Acronym"})
 
     # Add GGS information
     if not ignore_ggs:
@@ -216,15 +248,25 @@ def search4papers(output_file, keywords, blacklist, ratings, ignore_wikicfp, ign
         df_ggs = get_ggs_conferences(force_download=force_download, cache_dir=cache_dir)
 
         # Rename columns and remove index column
-        df_ggs = df_ggs.rename(columns={"Title": "GGS_title", "Acronym": "Acronym"}).drop([0], axis=1)
+        df_ggs = df_ggs.rename(columns={"Title": "GGS_title", "Acronym": "Acronym"})
+        df_ggs = df_ggs.drop([0], axis=1)
 
-        # Left join
-        df = pd.merge(df_core, df_ggs, on='Acronym', how='left')
+        # Perform merge operation (JOIN)
+        how = {"core": "left", "ggs": "right", "all": "outer"}
+        df = pd.merge(df_core, df_ggs, on='Acronym', how=how.get(ref_source, "outer"))
+
+        # Create reference title
+        df["Title"] = df[['CORE_title', 'GGS_title']].apply(lambda x: normalize_title(*x), axis=1)
 
     else:  # alias
         df = df_core
+
+        # Create reference title
+        df["Title"] = df["CORE_title"]
+
     # Filter conferences
-    df = filter_conferences(df, keywords=keywords, blacklist=blacklist, ratings=ratings)
+    df = filter_invalid_rows(df)
+    df = filter_conferences(df, keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings)
 
     # Add Wikicfp information
     if not ignore_wikicfp:
@@ -260,10 +302,10 @@ def search4papers(output_file, keywords, blacklist, ratings, ignore_wikicfp, ign
 
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--setup', type=str, default=None, choices=list(DEFAULT_SETUPS.keys()),
-                        help='Collection of default setups')
+    parser.add_argument('--setup', type=str, default=None, choices=list(DEFAULT_SETUPS.keys()), help='Collection of default setups')
     parser.add_argument('--output_file', type=str, default="conferences.csv", help='Output file')
-    parser.add_argument('--keywords', type=str, default=None, help='List of words. Comma-separated.')
+    parser.add_argument('--keywords', type=str, default=None, help='List of words to look for. Comma-separated.')
+    parser.add_argument('--nokeywords', type=str, default=None, help='List of words to exclude. Comma-separated.')
     parser.add_argument('--blacklist', type=str, default=None, help='List of words (conf. acronyms). Comma-separated.')
     parser.add_argument('--ratings', type=str, default=None, help='List of words (A*,A,B,C,...). Comma-separated.')
     parser.add_argument('--force_download', action='store_true', help='Force download, ignoring cache files.')
@@ -271,6 +313,7 @@ def main():
     parser.add_argument('--ignore_wikicfp', action='store_true', help='Ignore information from Wikicfp.')
     parser.add_argument('--ignore_ggs', action='store_true', help='Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.')
     parser.add_argument('--show-extra', action='store_true', help='Show extra columns')
+    parser.add_argument('--ref-source', type=str, default="all", choices=["core", "ggs", "all"], help='Reference source for the LEFT JOIN (all=outer join)')
 
     # Pars vars
     args = parser.parse_args()
@@ -278,18 +321,20 @@ def main():
     # Default vars
     if args.setup:
         keywords = DEFAULT_SETUPS[args.setup]["keywords"]
+        nokeywords = DEFAULT_SETUPS[args.setup]["nokeywords"]
         blacklist = DEFAULT_SETUPS[args.setup]["blacklist"]
         ratings = DEFAULT_SETUPS[args.setup]["ratings"]
     else:
         keywords = {} if args.keywords is None else set(args.keywords.split(","))
+        nokeywords = {} if args.nokeywords is None else set(args.nokeywords.split(","))
         blacklist = {} if args.blacklist is None else set(args.blacklist.split(","))
         ratings = {} if args.ratings is None else set(args.ratings.split(","))
 
     # Run
     search4papers(force_download=args.force_download, output_file=args.output_file,
-                  keywords=keywords, blacklist=blacklist, ratings=ratings,
+                  keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings,
                   ignore_wikicfp=args.ignore_wikicfp, ignore_ggs=args.ignore_ggs,
-                  only_next_year=args.only_next_year, show_extra=args.show_extra)
+                  only_next_year=args.only_next_year, show_extra=args.show_extra, ref_source=args.ref_source)
 
 
 if __name__ == '__main__':

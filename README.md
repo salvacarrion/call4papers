@@ -29,7 +29,7 @@ call4papers --setup "nlp"
 **Custom keywords, blacklist and ratings:**
 
 ```
-call4papers --keywords "linguistics, translation, learning" --blacklist "AAAA,BBBB" --ratings "A*,A,B"
+call4papers --keywords "linguistics, translation, learning" --nokeywords "compilers" --blacklist "AAAA,BBBB" --ratings "A*,A,B,1,2"
 ```
 
                                                                                               
@@ -41,15 +41,20 @@ You can simply edit the file ``call4papers/constants.py`` to add all the setups 
 **More options:**
 
 ```
-usage: call4papers [-h] [--setup {nlp}] [--output_file OUTPUT_FILE] [--keywords KEYWORDS] [--blacklist BLACKLIST] [--ratings RATINGS] [--force_download]
-                   [--only_next_year] [--ignore_wikicfp] [--ignore_ggs] [--show-extra]
+=> call4papers -h  
+usage: call4papers [-h] [--setup {nlp}] [--output_file OUTPUT_FILE] [--keywords KEYWORDS] [--nokeywords NOKEYWORDS] [--blacklist BLACKLIST] [--ratings RATINGS]
+                   [--force_download] [--only_next_year] [--ignore_wikicfp] [--ignore_ggs] [--show-extra] [--ref-source {core,ggs,all}]
+
+Process some integers.
 
 optional arguments:
   -h, --help            show this help message and exit
   --setup {nlp}         Collection of default setups
   --output_file OUTPUT_FILE
                         Output file
-  --keywords KEYWORDS   List of words. Comma-separated.
+  --keywords KEYWORDS   List of words to look for. Comma-separated.
+  --nokeywords NOKEYWORDS
+                        List of words to exclude. Comma-separated.
   --blacklist BLACKLIST
                         List of words (conf. acronyms). Comma-separated.
   --ratings RATINGS     List of words (A*,A,B,C,...). Comma-separated.
@@ -58,6 +63,9 @@ optional arguments:
   --ignore_wikicfp      Ignore information from Wikicfp.
   --ignore_ggs          Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.
   --show-extra          Show extra columns
+  --ref-source {core,ggs,all}
+                        Reference source for the LEFT JOIN (all=outer join)
+
 ```
 
 
