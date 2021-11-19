@@ -36,10 +36,42 @@ DEFAULT_SETUPS = {
             "neural networks",
             "neural",
             "learning",
+            "vision"
         },
         "nokeywords": {
         },
         "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "blacklist": {},
-    }
+    },
+
+    "all": {
+            "keywords": {
+                "computational linguistics",
+                "machine translation",
+                "natural language",
+                "artificial intelligence",
+                "pattern recognition",
+                "machine learning",
+                "neural networks",
+                "neural",
+                "language",
+                "learning",
+                "vision",
+                "data mining",
+                "intelligent",
+                "knowledge",
+            },
+            "nokeywords": {
+                "object oriented",
+                "object-oriented",
+                "automata languages",
+                "compilers",
+                "programming languages",
+                "design languages",
+                "engineering languages",
+                "constraint programming"
+            },
+            "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
+            "blacklist": {"cicling"},
+        },
 }
