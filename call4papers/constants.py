@@ -62,16 +62,8 @@ DEFAULT_SETUPS = {
                 "knowledge",
             },
             "nokeywords": {
-                "object oriented",
-                "object-oriented",
-                "automata languages",
-                "compilers",
-                "programming languages",
-                "design languages",
-                "engineering languages",
-                "constraint programming"
             },
             "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
-            "blacklist": {"cicling"},
+            "blacklist": {},
         },
 }
