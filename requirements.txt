@@ -6,3 +6,4 @@ requests
 bs4
 lxml
 openpyxl
+python-dateutil

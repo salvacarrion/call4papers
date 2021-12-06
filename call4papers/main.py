@@ -2,7 +2,10 @@ import os
 import math
 import argparse
 import datetime
+
+import dateutil.parser
 import requests
+import re
 from pathlib import Path
 
 import urllib.parse
@@ -12,6 +15,7 @@ import pandas as pd
 from thefuzz import process
 from tqdm import tqdm
 from bs4 import BeautifulSoup
+from  dateutil.parser import parse
 
 from call4papers.constants import MINIMAL_COLUMNS, DEFAULT_SETUPS
 
@@ -158,7 +162,7 @@ def fuzzy_matching(df, title, threshold=0.75):
     return None, 0.0
 
 
-def get_deadlines(title, acronym, year='f', only_next_year=False):
+def get_deadlines(title, acronym, year='f', in_time=False):
     # year: all='a', 2021='t', 2021+='f', 2022='n'
     results = []
 
@@ -183,8 +187,7 @@ def get_deadlines(title, acronym, year='f', only_next_year=False):
 
         # Check if exist exact acronym (this year and next)
         year = int(datetime.datetime.now().year)
-        list_years = [year+1] if only_next_year else [year, year+1]
-        for yr in list_years:
+        for yr in [year, year+1]:
             df_yr = df.loc[df['Event'] == f"{acronym} {yr}"]
 
             # 1) Re-Check using fuzzy match
@@ -198,13 +201,28 @@ def get_deadlines(title, acronym, year='f', only_next_year=False):
                           "where": df_yr.iloc[1]["Where"],
                           "deadline": df_yr.iloc[1]["Deadline"],
                           }
+                clean_data(values)
+
+                # Add only deadlines in time
+                if in_time:
+                    try:
+                        deadline = values.get("deadline")
+                        deadline = datetime.datetime.strptime(deadline, '%Y-%m-%d').date()
+
+                        if deadline < datetime.date.today():
+                            values["deadline"] = "DUE"
+                    except (TypeError, ValueError) as e:
+                        values["deadline"] = ""
+
+                # Add values
                 results.append(values)
+
             else:
                 print(f'No exact match has been found ({thrs}% matching): {acronym} {yr} | {title}')
     return results
 
 
-def prettify_csv(df, show_extra):
+def prettify_csv(df, show_extra, sort_by_rating):
     # Rename columns
     df = df.rename(columns={"Rank": "CORE rank"})
 
@@ -217,8 +235,11 @@ def prettify_csv(df, show_extra):
     # Apply column sort
     df = df[columns1]
 
-    # Sort by Acronym
-    df = df.sort_values(by=['Acronym'])
+    # Sort by Acronym (stable sort)
+    if sort_by_rating:
+        df = df.sort_values(by=['GGS Class', 'CORE rank', 'Acronym'])
+    else:
+        df = df.sort_values(by=['Acronym'])
     return df
 
 
@@ -232,8 +253,28 @@ def normalize_title(title1, title2):
     return title_normalized
 
 
+def normalize_dates(date):
+    try:
+        # Remove brackets
+        new_date = re.sub(r"\(.*\)", "", date)
+
+        # Parse date
+        new_date = parse(str(new_date))
+
+        # Format
+        new_date = str(new_date.date())
+        return new_date
+    except dateutil.parser.ParserError:
+        print(f"\t=>[INVALID DATE]: {date}")
+        return date
+
+
+def clean_data(data):
+    data["deadline"] = normalize_dates(data["deadline"]) if data.get("deadline") else ""
+
+
 def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_wikicfp, ignore_ggs,
-                  only_next_year, force_download, show_extra, ref_source):
+                  in_time, force_download, show_extra, ref_source):
     # Create cache folder if it does not exists
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".cache"))
     p = Path(cache_dir)
@@ -283,12 +324,12 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
         for i, row in tqdm(df.iterrows(), total=len(df)):
             # if row["Acronym"] != "IEA/AIE":
             #     continue
-            results = get_deadlines(title=row["Title"], acronym=row["Acronym"], only_next_year=only_next_year)
+            results = get_deadlines(title=row["Title"], acronym=row["Acronym"], in_time=in_time)
 
-            if len(results) == 0:
+            if len(results) == 0:  # No results
                 d = dict(row)
                 new_rows.append(d)
-            elif len(results) > 0:
+            elif len(results) > 0:  # Results
                 for r in results:
                     d = dict(list(dict(row).items()) + list(r.items()))
                     new_rows.append(d)
@@ -299,10 +340,14 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
         # Force types
         df.astype({"Event year": int}, errors='ignore')
 
+        # Clean stuff
+        if in_time:
+            df = df[~(df.deadline.isin(["DUE", "TBD", ""]) | df.deadline.isnull())]
+
     # Save table
     if output_file:
         # Prettify output
-        df = prettify_csv(df, show_extra)
+        df = prettify_csv(df, show_extra, sort_by_rating=True)
 
         # Save file
         df.to_csv(output_file, index=False)
@@ -319,11 +364,11 @@ def main():
     parser.add_argument('--blacklist', type=str, default=None, help='List of words (conf. acronyms). Comma-separated.')
     parser.add_argument('--ratings', type=str, default=None, help='List of words (A*,A,B,C,...). Comma-separated.')
     parser.add_argument('--force-download', action='store_true', help='Force download, ignoring cache files.')
-    parser.add_argument('--only-next-year', action='store_true', help='Get information only about next year.')
     parser.add_argument('--ignore-wikicfp', action='store_true', help='Ignore information from Wikicfp.')
     parser.add_argument('--ignore-ggs', action='store_true', help='Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.')
     parser.add_argument('--show-extra', action='store_true', help='Show extra columns')
     parser.add_argument('--ref-source', type=str, default="all", choices=["core", "ggs", "all"], help='Reference source for the LEFT JOIN (all=outer join)')
+    parser.add_argument('--in-time', action='store_true', help='Show only conferences where the deadline has not passed')
 
     # Pars vars
     args = parser.parse_args()
@@ -353,7 +398,8 @@ def main():
     search4papers(force_download=args.force_download, output_file=args.output_file,
                   keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings,
                   ignore_wikicfp=args.ignore_wikicfp, ignore_ggs=args.ignore_ggs,
-                  only_next_year=args.only_next_year, show_extra=args.show_extra, ref_source=args.ref_source)
+                  in_time=args.in_time, show_extra=args.show_extra, ref_source=args.ref_source,
+                  )
 
 
 if __name__ == '__main__':
