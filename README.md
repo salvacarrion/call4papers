@@ -42,14 +42,15 @@ You can simply edit the file ``call4papers/constants.py`` to add all the setups 
 
 ```
 => call4papers -h  
-usage: call4papers [-h] [--setup {nlp,vision}] [--output-file OUTPUT_FILE] [--keywords KEYWORDS] [--nokeywords NOKEYWORDS] [--blacklist BLACKLIST] [--ratings RATINGS]
-                   [--force-download] [--only-next-year] [--ignore-wikicfp] [--ignore-ggs] [--show-extra] [--ref-source {core,ggs,all}]
+usage: call4papers [-h] [--setup {nlp,vision,all}] [--output-file OUTPUT_FILE] [--keywords KEYWORDS] [--nokeywords NOKEYWORDS] [--blacklist BLACKLIST] [--ratings RATINGS]
+                   [--force-download] [--ignore-wikicfp] [--ignore-ggs] [--show-extra] [--ref-source {core,ggs,all}] [--in-time] [--sort-by-rating]
 
 Process some integers.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --setup {nlp,vision}  Collection of default setups
+  --setup {nlp,vision,all}
+                        Collection of default setups
   --output-file OUTPUT_FILE
                         Output file
   --keywords KEYWORDS   List of words to look for. Comma-separated.
@@ -59,12 +60,13 @@ optional arguments:
                         List of words (conf. acronyms). Comma-separated.
   --ratings RATINGS     List of words (A*,A,B,C,...). Comma-separated.
   --force-download      Force download, ignoring cache files.
-  --only-next-year      Get information only about next year.
   --ignore-wikicfp      Ignore information from Wikicfp.
   --ignore-ggs          Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.
   --show-extra          Show extra columns
   --ref-source {core,ggs,all}
                         Reference source for the LEFT JOIN (all=outer join)
+  --in-time             Show only conferences where the deadline has not passed
+  --sort-by-rating      Sort conferences by rating
 ```
 
 

@@ -274,7 +274,7 @@ def clean_data(data):
 
 
 def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_wikicfp, ignore_ggs,
-                  in_time, force_download, show_extra, ref_source):
+                  in_time, force_download, show_extra, ref_source, sort_by_rating):
     # Create cache folder if it does not exists
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".cache"))
     p = Path(cache_dir)
@@ -347,7 +347,7 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
     # Save table
     if output_file:
         # Prettify output
-        df = prettify_csv(df, show_extra, sort_by_rating=True)
+        df = prettify_csv(df, show_extra, sort_by_rating=sort_by_rating)
 
         # Save file
         df.to_csv(output_file, index=False)
@@ -369,6 +369,7 @@ def main():
     parser.add_argument('--show-extra', action='store_true', help='Show extra columns')
     parser.add_argument('--ref-source', type=str, default="all", choices=["core", "ggs", "all"], help='Reference source for the LEFT JOIN (all=outer join)')
     parser.add_argument('--in-time', action='store_true', help='Show only conferences where the deadline has not passed')
+    parser.add_argument('--sort-by-rating', action='store_true', help='Sort conferences by rating')
 
     # Pars vars
     args = parser.parse_args()
@@ -399,6 +400,7 @@ def main():
                   keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings,
                   ignore_wikicfp=args.ignore_wikicfp, ignore_ggs=args.ignore_ggs,
                   in_time=args.in_time, show_extra=args.show_extra, ref_source=args.ref_source,
+                  sort_by_rating=args.sort_by_rating
                   )
 
 
