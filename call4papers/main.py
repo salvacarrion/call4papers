@@ -374,6 +374,10 @@ def main():
     # Pars vars
     args = parser.parse_args()
 
+    # Check output file
+    if not os.path.isfile(args.output_file):
+        raise ValueError("The output file must be a file")
+
     # Default vars
     if args.setup:
         keywords = DEFAULT_SETUPS[args.setup]["keywords"]
