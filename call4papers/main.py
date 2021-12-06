@@ -375,8 +375,12 @@ def main():
     args = parser.parse_args()
 
     # Check output file
-    if not os.path.isfile(args.output_file):
-        raise ValueError("The output file must be a file")
+    if not args.output_file.endswith(".csv"):
+        raise ValueError("The output file must end with '.csv'")
+
+    # Check if the output file exists
+    if os.path.isfile(args.output_file):
+        print("The file already exists. It will be overwritten")
 
     # Default vars
     if args.setup:
