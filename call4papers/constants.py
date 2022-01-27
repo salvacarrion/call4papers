@@ -36,7 +36,7 @@ DEFAULT_SETUPS = {
                       "ACL", "EMNLP", "NAACL", "TACL", "COLING", "CoNLL", "EACL", "IJCNLP", "EAMT", "LORESMT", "PACLIC",
                       "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
-                      "COORDINATION", "ECML PKDD", "WOLLIC"},
+                      "COORDINATION", "ECML PKDD", "WOLLIC", "ICAART", "MDAI", "AIME", "PLOP", "PACLIC", "IAAI"},
     },
 
     "vision": {
@@ -71,7 +71,7 @@ DEFAULT_SETUPS = {
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
                       "ACL", "EMNLP", "NAACL", "TACL", "COLING", "CoNLL", "EACL", "IJCNLP", "EAMT", "LORESMT", "PACLIC",
                       "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA"},
-        "blacklist": "all", # Trick
+        "blacklist": "all",  # Trick
     },
 }
 
