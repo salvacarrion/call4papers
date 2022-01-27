@@ -120,34 +120,46 @@ def filter_invalid_rows(df):
     return df
 
 
-def filter_conferences(df, keywords, nokeywords, blacklist, ratings):
+def filter_conferences(df, keywords, nokeywords, whitelist, blacklist, ratings):
+    mask = True
+
     # Filter by keywords
     if keywords:
         kw_filter = '|'.join(keywords).lower()
-        mask = df['Title'].str.contains(kw_filter, case=False, regex=True)
+        mask2 = df['Title'].str.contains(kw_filter, case=False, regex=True)
         if "GGS_title" in df.columns:
-            mask = mask | df['GGS_title'].str.contains(kw_filter, case=False, regex=True)
-        df = df[mask]
+            mask2 = mask2 | df['GGS_title'].str.contains(kw_filter, case=False, regex=True)
+        mask = mask & mask2
 
     # Filter by keywords
     if nokeywords:
         kw_filter = '|'.join(nokeywords).lower()
-        mask = df['Title'].str.contains(kw_filter, case=False, regex=True)
+        mask2 = df['Title'].str.contains(kw_filter, case=False, regex=True)
         if "GGS_title" in df.columns:
-            mask = mask | df['GGS_title'].str.contains(kw_filter, case=False, regex=True)
-        df = df[~mask]
-
-    # Filter by acronym blacklist
-    if blacklist:
-        kw_filter = '|'.join(blacklist).lower()
-        df = df[~df['Acronym'].str.contains(kw_filter, case=False, regex=True)]
+            mask2 = mask2 | df['GGS_title'].str.contains(kw_filter, case=False, regex=True)
+        mask = mask & ~mask2
 
     # Filter by rating
     if ratings:
-        mask = df['Rank'].apply(lambda x: any(str(x).strip().upper() == str(rat).strip().upper() for rat in ratings))
+        mask2 = df['Rank'].apply(lambda x: any(str(x).strip().upper() == str(rat).strip().upper() for rat in ratings))
         if "GGS Class" in df.columns:
-            mask = mask | df['GGS Class'].apply(lambda x: any(str(x).strip().upper() == str(rat).strip().upper() for rat in ratings))
-        df = df[mask]
+            mask2 = mask2 | df['GGS Class'].apply(lambda x: any(str(x).strip().upper() == str(rat).strip().upper() for rat in ratings))
+        mask = mask & mask2
+
+    # Filter by acronym: blacklist
+    if blacklist:
+        kw_filter = f"\\b(?:{'|'.join(blacklist).lower()})\\b"
+        mask2 = df['Acronym'].str.contains(kw_filter, case=False, regex=True)
+        mask = mask & ~mask2
+
+    # Filter by acronym: whitelist
+    if whitelist:
+        kw_filter = f"\\b(?:{'|'.join(whitelist).lower()})\\b"
+        mask2 = df['Acronym'].str.contains(kw_filter, case=False, regex=True)
+        mask = mask | mask2
+
+    # Apply mask
+    df = df[mask]
     return df
 
 
@@ -236,10 +248,11 @@ def prettify_csv(df, show_extra, sort_by_rating):
     df = df[columns1]
 
     # Sort by Acronym (stable sort)
+    sort_cols = []
     if sort_by_rating:
-        df = df.sort_values(by=['GGS Class', 'CORE rank', 'Acronym'])
-    else:
-        df = df.sort_values(by=['Acronym'])
+        sort_cols = ["GGS Class", "CORE rank"]
+    sort_cols += ["deadline"] if "deadline" in df.columns else []
+    df = df.sort_values(by=sort_cols + ["Acronym"])
     return df
 
 
@@ -273,7 +286,7 @@ def clean_data(data):
     data["deadline"] = normalize_dates(data["deadline"]) if data.get("deadline") else ""
 
 
-def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_wikicfp, ignore_ggs,
+def search4papers(output_file, keywords, nokeywords, whitelist, blacklist, ratings, ignore_wikicfp, ignore_ggs,
                   in_time, force_download, show_extra, ref_source, sort_by_rating):
     # Create cache folder if it does not exists
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".cache"))
@@ -316,7 +329,8 @@ def search4papers(output_file, keywords, nokeywords, blacklist, ratings, ignore_
 
     # Filter conferences
     df = filter_invalid_rows(df)
-    df = filter_conferences(df, keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings)
+    df = filter_conferences(df, keywords=keywords, nokeywords=nokeywords,
+                            whitelist=whitelist, blacklist=blacklist, ratings=ratings)
 
     # Add Wikicfp information
     if not ignore_wikicfp:
@@ -361,6 +375,7 @@ def main():
     parser.add_argument('--output-file', type=str, default="conferences.csv", help='Output file')
     parser.add_argument('--keywords', type=str, default=None, help='List of words to look for. Comma-separated.')
     parser.add_argument('--nokeywords', type=str, default=None, help='List of words to exclude. Comma-separated.')
+    parser.add_argument('--whitelist', type=str, default=None, help='List of words (conf. acronyms). Comma-separated.')
     parser.add_argument('--blacklist', type=str, default=None, help='List of words (conf. acronyms). Comma-separated.')
     parser.add_argument('--ratings', type=str, default=None, help='List of words (A*,A,B,C,...). Comma-separated.')
     parser.add_argument('--force-download', action='store_true', help='Force download, ignoring cache files.')
@@ -386,11 +401,13 @@ def main():
     if args.setup:
         keywords = DEFAULT_SETUPS[args.setup]["keywords"]
         nokeywords = DEFAULT_SETUPS[args.setup]["nokeywords"]
+        whitelist = DEFAULT_SETUPS[args.setup]["whitelist"]
         blacklist = DEFAULT_SETUPS[args.setup]["blacklist"]
         ratings = DEFAULT_SETUPS[args.setup]["ratings"]
     else:
         keywords = {} if args.keywords is None else set(args.keywords.split(","))
         nokeywords = {} if args.nokeywords is None else set(args.nokeywords.split(","))
+        whitelist = {} if args.whitelist is None else set(args.whitelist.split(","))
         blacklist = {} if args.blacklist is None else set(args.blacklist.split(","))
         ratings = {} if args.ratings is None else set(args.ratings.split(","))
 
@@ -399,13 +416,14 @@ def main():
     print(f"- Setup: {args.setup.upper() if args.setup else 'None' }")
     print(f"- Keywords: {', '.join(sorted(list(keywords))).lower()}")
     print(f"- Exclusion keywords: {', '.join(sorted(list(nokeywords))).lower()}")
+    print(f"- Whitelist (Acronyms): {', '.join(sorted(list(whitelist))).upper()}")
     print(f"- Blacklist (Acronyms): {', '.join(sorted(list(blacklist))).upper()}")
     print(f"- Ratings: {', '.join(sorted(list(ratings))).upper()}")
     print("-"*80)
 
     # Run
     search4papers(force_download=args.force_download, output_file=args.output_file,
-                  keywords=keywords, nokeywords=nokeywords, blacklist=blacklist, ratings=ratings,
+                  keywords=keywords, nokeywords=nokeywords, whitelist=whitelist, blacklist=blacklist, ratings=ratings,
                   ignore_wikicfp=args.ignore_wikicfp, ignore_ggs=args.ignore_ggs,
                   in_time=args.in_time, show_extra=args.show_extra, ref_source=args.ref_source,
                   sort_by_rating=args.sort_by_rating
