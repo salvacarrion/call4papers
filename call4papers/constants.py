@@ -63,6 +63,16 @@ DEFAULT_SETUPS = {
                       "COORDINATION", "ECML PKDD", "IDA", "IVA", "IDC", "ACIIDS", "ISC", "ITS", "EC-TEL", "LAK",
                       "IUI", "VISIGRAPP"},
     },
+
+    "custom": {
+        "keywords": {},
+        "nokeywords": {},
+        "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
+        "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
+                      "ACL", "EMNLP", "NAACL", "TACL", "COLING", "CoNLL", "EACL", "IJCNLP", "EAMT", "LORESMT", "PACLIC",
+                      "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA"},
+        "blacklist": "all", # Trick
+    },
 }
 
 # Get all keys

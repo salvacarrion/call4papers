@@ -152,6 +152,9 @@ def filter_conferences(df, keywords, nokeywords, whitelist, blacklist, ratings):
         mask2 = df['Acronym'].str.contains(kw_filter, case=False, regex=True)
         mask = mask & ~mask2
 
+    elif blacklist == "all":  # Trick. BLock all but whitelist
+        mask = False
+
     # Filter by acronym: whitelist
     if whitelist:
         kw_filter = f"\\b(?:{'|'.join(whitelist).lower()})\\b"
