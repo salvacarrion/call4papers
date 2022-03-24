@@ -181,6 +181,11 @@ def get_deadlines(title, acronym, year='f', in_time=False):
     # year: all='a', 2021='t', 2021+='f', 2022='n'
     results = []
 
+    # Fix acronym
+    if ' ' in acronym:
+        # print(f"[INFO]: Removing whitespace form acronym '{acronym}'...")
+        acronym = acronym.replace(' ', '')
+
     # Get table
     url = f"http://www.wikicfp.com/cfp/servlet/tool.search?q={urllib.parse.quote(acronym)}&year={year}"
     tables = pd.read_html(url)
@@ -237,9 +242,18 @@ def get_deadlines(title, acronym, year='f', in_time=False):
     return results
 
 
+def rank_normalizer(rank):
+    rank = str(rank).upper().strip()
+    coeff = {"A*": 200, "1": 200, "A": 150, "2": 150, "B": 100, "3": 100, "C": 30}
+    return coeff.get(rank, 0)
+
+
 def prettify_csv(df, show_extra, sort_by_rating):
     # Rename columns
     df = df.rename(columns={"Rank": "CORE rank"})
+
+    # Add extra columns
+    df["Max rank"] = [max(rank_normalizer(r1), rank_normalizer(r2)) for r1, r2 in zip(df["GGS Class"], df["CORE rank"])]
 
     # Show minimal columns
     columns1 = [c for c in MINIMAL_COLUMNS if c in set(df.columns)]
@@ -250,12 +264,14 @@ def prettify_csv(df, show_extra, sort_by_rating):
     # Apply column sort
     df = df[columns1]
 
-    # Sort by Acronym (stable sort)
+    # Sort by(stable sort)
     sort_cols = []
-    if sort_by_rating:
-        sort_cols = ["GGS Class", "CORE rank"]
+    sort_cols += ["GGS Class", "CORE rank"] if sort_by_rating else []
     sort_cols += ["deadline"] if "deadline" in df.columns else []
-    df = df.sort_values(by=sort_cols + ["Acronym"])
+    df = df.sort_values(by=sort_cols + ["Acronym"], ascending=True)  # Ascending
+    sort_cols = []
+    sort_cols += ["Max rank"] if "Max rank" in df.columns else []
+    df = df.sort_values(by=sort_cols, ascending=False)  # Descending
     return df
 
 
@@ -339,7 +355,7 @@ def search4papers(output_file, keywords, nokeywords, whitelist, blacklist, ratin
     if not ignore_wikicfp:
         new_rows = []
         for i, row in tqdm(df.iterrows(), total=len(df)):
-            # if row["Acronym"] != "IEA/AIE":
+            # if row["Acronym"] != "ECML PKDD":
             #     continue
             results = get_deadlines(title=row["Title"], acronym=row["Acronym"], in_time=in_time)
 

@@ -1,4 +1,4 @@
-MINIMAL_COLUMNS = ["Acronym",  "Title",  "CORE rank", "GGS Class",  "deadline",  "when",  "where"]
+MINIMAL_COLUMNS = ["Acronym",  "Title",  "Max rank", "CORE rank", "GGS Class",  "deadline",  "when",  "where"]
 
 DEFAULT_SETUPS = {
     "nlp": {
@@ -37,7 +37,7 @@ DEFAULT_SETUPS = {
                       "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA",
                       "ECAI", "ICPR", "ECML", "ECMLPKDD"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
-                      "COORDINATION", "WOLLIC", "ICAART", "MDAI", "AIME", "PLOP", "PACLIC", "IAAI"},
+                      "COORDINATION", "WOLLIC", "ICAART", "MDAI", "AIME", "PLOP", "PACLIC", "IAAI", "VL/HCC"},
     },
 
     "vision": {
@@ -59,7 +59,7 @@ DEFAULT_SETUPS = {
         },
         "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
-                      "CVPR", "ICCV", "ECCV", "ICPR", "ECAI", "ECML", "ECMLPKDD"},
+                      "CVPR", "ICCV", "ECCV", "ICPR", "ECAI", "ECML", "ECML PKDD"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
                       "COORDINATION", "IDA", "IVA", "IDC", "ACIIDS", "ISC", "ITS", "EC-TEL", "LAK",
                       "IUI", "VISIGRAPP"},
