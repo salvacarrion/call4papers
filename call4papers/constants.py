@@ -34,9 +34,10 @@ DEFAULT_SETUPS = {
         "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
                       "ACL", "EMNLP", "NAACL", "TACL", "COLING", "CoNLL", "EACL", "IJCNLP", "EAMT", "LORESMT", "PACLIC",
-                      "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA"},
+                      "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA",
+                      "ECAI", "ICPR", "ECML", "ECMLPKDD"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
-                      "COORDINATION", "ECML PKDD", "WOLLIC", "ICAART", "MDAI", "AIME", "PLOP", "PACLIC", "IAAI"},
+                      "COORDINATION", "WOLLIC", "ICAART", "MDAI", "AIME", "PLOP", "PACLIC", "IAAI"},
     },
 
     "vision": {
@@ -58,9 +59,9 @@ DEFAULT_SETUPS = {
         },
         "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
-                      "CVPR", "ICCV", "ECCV", "ICPR"},
+                      "CVPR", "ICCV", "ECCV", "ICPR", "ECAI", "ECML", "ECMLPKDD"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
-                      "COORDINATION", "ECML PKDD", "IDA", "IVA", "IDC", "ACIIDS", "ISC", "ITS", "EC-TEL", "LAK",
+                      "COORDINATION", "IDA", "IVA", "IDC", "ACIIDS", "ISC", "ITS", "EC-TEL", "LAK",
                       "IUI", "VISIGRAPP"},
     },
 
