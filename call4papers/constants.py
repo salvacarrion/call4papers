@@ -1,4 +1,4 @@
-MINIMAL_COLUMNS = ["Acronym",  "Title",  "Max rank", "CORE rank", "GGS Class",  "deadline",  "when",  "where"]
+MINIMAL_COLUMNS = ["Acronym",  "Title",  "Max rank", "Acceptance Rate", "CORE rank", "GGS Class",  "deadline",  "when",  "where"]
 
 DEFAULT_SETUPS = {
     "nlp": {
@@ -35,7 +35,7 @@ DEFAULT_SETUPS = {
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
                       "ACL", "EMNLP", "NAACL", "TACL", "COLING", "CoNLL", "EACL", "IJCNLP", "EAMT", "LORESMT", "PACLIC",
                       "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA",
-                      "ECAI", "ICPR", "ECML", "ECMLPKDD"},
+                      "ECAI", "ICPR", "ECML", "ECMLPKDD", "IBPRIA"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
                       "COORDINATION", "WOLLIC", "ICAART", "MDAI", "AIME", "PLOP", "PACLIC", "IAAI", "VL/HCC"},
     },
@@ -59,7 +59,7 @@ DEFAULT_SETUPS = {
         },
         "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
-                      "CVPR", "ICCV", "ECCV", "ICPR", "ECAI", "ECML", "ECML PKDD"},
+                      "CVPR", "ICCV", "ECCV", "ICPR", "ECAI", "ECML", "ECML PKDD", "IBPRIA"},
         "blacklist": {"PLDI", "PADL", "ALT", "CICLING", "DLT", "SLE", "NLDB", "DLS", "LATA", "SNPD", "JELIA",
                       "COORDINATION", "IDA", "IVA", "IDC", "ACIIDS", "ISC", "ITS", "EC-TEL", "LAK",
                       "IUI", "VISIGRAPP"},
@@ -71,7 +71,8 @@ DEFAULT_SETUPS = {
         "ratings": {"A*", "A", "B", "C", "1", "2", "3"},
         "whitelist": {"NEURIPS", "ICLR", "ICML", "AAAI", "IJCAI", "COLT", "AISTATS", "IJCNN",
                       "ACL", "EMNLP", "NAACL", "TACL", "COLING", "CoNLL", "EACL", "IJCNLP", "EAMT", "LORESMT", "PACLIC",
-                      "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA"},
+                      "AMTA", "MT SUMMIT", "INLG", "SIGDIAL", "SLT", "LREC", "SEMEVAL", "WMT", "RepL4NLP", "BEA",
+                      "IBPRIA"},
         "blacklist": "all",  # Trick
     },
 }
@@ -85,3 +86,128 @@ DEFAULT_SETUPS["all"] = {
     "blacklist": set().union(*[x["blacklist"] for x in DEFAULT_SETUPS.values()]),
 }
 
+ACCEPTANCE_RATE = {
+    # https://www.lamsade.dauphine.fr/~sikora/ratio/confs.php
+    #"AAAI": 21.6,
+    "AAIM": 49.0,
+    "ACML": 26.6,
+    "ALENEX": 31.2,
+    "ALT": 35.2,
+    "APBC": 32.0,
+    "APPROX": 45.6,
+    "ALCOB": 52.2,
+    "CALDAM": 35.6,
+    "CATS": 51.6,
+    "CCC": 33.5,
+    "CIAA": 49.7,
+    "CIAC": 36.2,
+    "COCOA": 47.3,
+    "COCOON": 41.8,
+    #"COLT": 31.4,
+    "CPM": 45.7,
+    "CSR": 43.4,
+    "CIE": 36.2,
+    "DISC": 23.7,
+    "DLT": 50.4,
+    "ECAI": 25.2,
+    "ECML PKDD": 23.1,
+    "ESA": 26.1,  # Track A
+    "EVOCOP": 39.4,
+    "FAW": 45.4,
+    "FCT": 36.5,
+    "FOCS": 28.0,
+    "FOSSACS": 29.2,
+    "FSTTCS": 33.0,
+    "FUN": 53.3,
+    "ICALP": 28.3,  # track A
+    "ICCS": 32.5,  # (main track)
+    "ICGT": 50.3,
+    #"ICML": 24.2,
+    "IFIP TCS": 47.2,
+    #"IJCAI": 22.0,
+    "IPCO": 28.3,
+    "IPEC": 53.5,
+    "ISAAC": 36.9,
+    "ISBRA": 30.6,
+    "ISCO": 39.8,
+    "ISMB/ECCB": 17.4,
+    "ITCS": 35.4,
+    "IWOCA": 41.5,
+    #"KDD": 14.9,
+    "LAGOS": 48.6,
+    "LATA": 39.9,
+    "LATIN": 34.4,
+    "MFCS": 38.3,
+    #"NEURIPS": 23.4,
+    "OPODIS": 34.2,
+    "PODC": 25.4,
+    "RECOMB": 18.8,
+    "RECOMB-CG": 56.7,
+    "SEA": 38.6,
+    "SIROCCO": 43.9,
+    "SODA": 30.0,
+    "SOFSEM": 35.6,
+    "SOSA": 24.5,
+    "SPIRE": 38.8,
+    "SSS": 40.6,
+    "STACS": 21.7,
+    "STOC": 26.3,
+    "SWAT": 30.3,
+    "SOCG": 36.7,
+    "TAMC": 39.8,
+    "TIME": 57.7,
+    "TTCS": 36.4,
+    "WABI": 40.4,
+    "WADS": 39.0,
+    "WALCOM": 36.6,
+    "WAOA": 41.2,
+    "WG": 38.4,
+    "WWW": 15.9,
+    "WOLLIC": 53.7,
+
+    # https://github.com/lixin4ever/Conference-Acceptance-Rate
+    "AAAI": 22.54,
+    "ACL": 25.64,
+    "AISTATS": 31.76,
+    "CIKM": 21.14,
+    "COLING": 32.20,
+    "COLT": 30.51,
+    "CVPR": 27.08,
+    "ECCV": 28.35,
+    "EMNLP": 26.18,
+    "ICASSP": 48.53,
+    "ICCV": 28.20,
+    "ICDM": 09.23,
+    "ICLR": 31.77,
+    "ICML": 22.74,
+    "IJCAI": 21.44,
+    "INTERSPEECH": 50.36,
+    "KDD": 16.39,
+    "NAACL": 28.65,  # NAACL-HLT
+    "NEURIPS": 22.35,
+    "RECSYS": 19.43,
+    "SIGIR": 21.15,
+    "THEWEBCONF": 16.72,
+    "UAI": 30.33,
+    "WSDM": 16.68,
+
+    # Manual
+    # https://www.openresearch.org/wiki/CONF
+    "ICPR": 43.4,
+    "AIED": 24.2,
+    "ECML": 24.2,
+    "IJCNLP": 28.3,
+    "IJCNN": 57.0,  # 66.6
+    "EACL": 25.3,
+    "INLG": 31.1,
+    "LREC": 65.2,
+    "ICANN": 43.8,  #?
+    "ICMLA": 31.0,
+    "IWCS": 43.4,
+    "IBPRIA": 76.0,
+    # "CLEF": 00.0,  #  ?
+    # "MT SUMMIT": 00.0,  #  ?
+    # "AMTA": 00.0,  #  ?
+    # "EAMT": 00.0,  #  ?
+}
+ACCEPTANCE_RATE = {k: v/100 for k,v in ACCEPTANCE_RATE.items()}  # Range between 0 and 1

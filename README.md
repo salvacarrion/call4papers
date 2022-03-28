@@ -1,7 +1,6 @@
 # Call4Papers
 
-Get a CSV with topic-related conferences along with their CORE rank, GGS Class, deadlines and more.
-
+Get a CSV with topic-related conferences along with their CORE rank, GGS Class, deadlines, acceptance rates and more. See [csv example](/examples/conferences.csv).
 
 ## Requirements
 

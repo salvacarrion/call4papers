@@ -17,7 +17,7 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup
 from  dateutil.parser import parse
 
-from call4papers.constants import MINIMAL_COLUMNS, DEFAULT_SETUPS
+from call4papers.constants import MINIMAL_COLUMNS, DEFAULT_SETUPS, ACCEPTANCE_RATE
 
 
 def get_core_conferences(force_download, cache_dir="."):
@@ -376,6 +376,9 @@ def search4papers(output_file, keywords, nokeywords, whitelist, blacklist, ratin
         # Clean stuff
         if in_time:
             df = df[~(df.deadline.isin(["DUE", "TBD", ""]) | df.deadline.isnull())]
+
+    # Add extra values
+    df["Acceptance Rate"] = df["Acronym"].apply(lambda x: ACCEPTANCE_RATE.get(str(x).strip().upper(), None))
 
     # Save table
     if output_file:
