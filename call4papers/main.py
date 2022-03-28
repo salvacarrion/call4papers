@@ -285,7 +285,7 @@ def prettify_csv(df, show_extra):
 
     # Sort by(stable sort)
     sort_cols = []
-    sort_cols += ["deadline"]
+    sort_cols += ["deadline", "GGS Class", "CORE rank"]
     df = df.sort_values(by=sort_cols, ascending=True, kind="mergesort")  # Ascending
     sort_cols = []
     sort_cols += ["Max rank"]
