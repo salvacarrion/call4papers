@@ -40,32 +40,31 @@ You can simply edit the file ``call4papers/constants.py`` to add all the setups 
 **More options:**
 
 ```
-=> call4papers -h  
-usage: call4papers [-h] [--setup {nlp,vision,all}] [--output-file OUTPUT_FILE] [--keywords KEYWORDS] [--nokeywords NOKEYWORDS] [--blacklist BLACKLIST] [--ratings RATINGS]
-                   [--force-download] [--ignore-wikicfp] [--ignore-ggs] [--show-extra] [--ref-source {core,ggs,all}] [--in-time] [--sort-by-rating]
+=> call4papers --help
+usage: call4papers [-h] [--setup {nlp,vision,custom,all}] [--output-file OUTPUT_FILE] [--keywords KEYWORDS] [--nokeywords NOKEYWORDS] [--whitelist WHITELIST]
+                   [--blacklist BLACKLIST] [--ratings RATINGS] [--force-download] [--show-extra] [--ref-source {core,ggs,all}] [--in-time]
 
 Process some integers.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --setup {nlp,vision,all}
+  --setup {nlp,vision,custom,all}
                         Collection of default setups
   --output-file OUTPUT_FILE
                         Output file
   --keywords KEYWORDS   List of words to look for. Comma-separated.
   --nokeywords NOKEYWORDS
                         List of words to exclude. Comma-separated.
+  --whitelist WHITELIST
+                        List of words (conf. acronyms). Comma-separated.
   --blacklist BLACKLIST
                         List of words (conf. acronyms). Comma-separated.
   --ratings RATINGS     List of words (A*,A,B,C,...). Comma-separated.
   --force-download      Force download, ignoring cache files.
-  --ignore-wikicfp      Ignore information from Wikicfp.
-  --ignore-ggs          Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.
   --show-extra          Show extra columns
   --ref-source {core,ggs,all}
                         Reference source for the LEFT JOIN (all=outer join)
   --in-time             Show only conferences where the deadline has not passed
-  --sort-by-rating      Sort conferences by rating
 ```
 
 

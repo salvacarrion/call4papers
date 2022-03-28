@@ -10,6 +10,7 @@ from pathlib import Path
 
 import urllib.parse
 from urllib.error import HTTPError
+import multiprocessing as mp
 
 import pandas as pd
 from thefuzz import process
@@ -242,13 +243,31 @@ def get_deadlines(title, acronym, year='f', in_time=False):
     return results
 
 
+def process_deadlines(args):
+    row, in_time = args
+
+    # if row["Acronym"] != "ECML PKDD":
+    #     continue
+
+    results = get_deadlines(title=row["Title"], acronym=row["Acronym"], in_time=in_time)
+    new_rows = []
+    if len(results) == 0:  # No results
+        d = dict(row)
+        new_rows.append(d)
+    elif len(results) > 0:  # Results
+        for r in results:
+            d = dict(list(dict(row).items()) + list(r.items()))
+            new_rows.append(d)
+    return new_rows
+
+
 def rank_normalizer(rank):
     rank = str(rank).upper().strip()
     coeff = {"A*": 200, "1": 200, "A": 150, "2": 150, "B": 100, "3": 100, "C": 30}
     return coeff.get(rank, 0)
 
 
-def prettify_csv(df, show_extra, sort_by_rating):
+def prettify_csv(df, show_extra):
     # Rename columns
     df = df.rename(columns={"Rank": "CORE rank"})
 
@@ -266,12 +285,11 @@ def prettify_csv(df, show_extra, sort_by_rating):
 
     # Sort by(stable sort)
     sort_cols = []
-    sort_cols += ["GGS Class", "CORE rank"] if sort_by_rating else []
-    sort_cols += ["deadline"] if "deadline" in df.columns else []
-    df = df.sort_values(by=sort_cols + ["Acronym"], ascending=True)  # Ascending
+    sort_cols += ["deadline"]
+    df = df.sort_values(by=sort_cols, ascending=True, kind="mergesort")  # Ascending
     sort_cols = []
-    sort_cols += ["Max rank"] if "Max rank" in df.columns else []
-    df = df.sort_values(by=sort_cols, ascending=False)  # Descending
+    sort_cols += ["Max rank"]
+    df = df.sort_values(by=sort_cols, ascending=False, kind="mergesort")  # Descending
     return df
 
 
@@ -306,7 +324,7 @@ def clean_data(data):
 
 
 def search4papers(output_file, keywords, nokeywords, whitelist, blacklist, ratings, ignore_wikicfp, ignore_ggs,
-                  in_time, force_download, show_extra, ref_source, sort_by_rating):
+                  in_time, force_download, show_extra, ref_source):
     # Create cache folder if it does not exists
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".cache"))
     p = Path(cache_dir)
@@ -353,22 +371,11 @@ def search4papers(output_file, keywords, nokeywords, whitelist, blacklist, ratin
 
     # Add Wikicfp information
     if not ignore_wikicfp:
-        new_rows = []
-        for i, row in tqdm(df.iterrows(), total=len(df)):
-            # if row["Acronym"] != "ECML PKDD":
-            #     continue
-            results = get_deadlines(title=row["Title"], acronym=row["Acronym"], in_time=in_time)
-
-            if len(results) == 0:  # No results
-                d = dict(row)
-                new_rows.append(d)
-            elif len(results) > 0:  # Results
-                for r in results:
-                    d = dict(list(dict(row).items()) + list(r.items()))
-                    new_rows.append(d)
+        pool = mp.Pool(mp.cpu_count())
+        new_rows = pool.map(process_deadlines, [(row, in_time) for i, row in tqdm(df.iterrows(), total=len(df))])
 
         # Create new Dataframe
-        df = pd.DataFrame(new_rows)
+        df = pd.DataFrame(sum(new_rows, []))  # Flat list
 
         # Force types
         df.astype({"Event year": int}, errors='ignore')
@@ -383,7 +390,7 @@ def search4papers(output_file, keywords, nokeywords, whitelist, blacklist, ratin
     # Save table
     if output_file:
         # Prettify output
-        df = prettify_csv(df, show_extra, sort_by_rating=sort_by_rating)
+        df = prettify_csv(df, show_extra)
 
         # Save file
         df.to_csv(output_file, index=False)
@@ -401,12 +408,9 @@ def main():
     parser.add_argument('--blacklist', type=str, default=None, help='List of words (conf. acronyms). Comma-separated.')
     parser.add_argument('--ratings', type=str, default=None, help='List of words (A*,A,B,C,...). Comma-separated.')
     parser.add_argument('--force-download', action='store_true', help='Force download, ignoring cache files.')
-    parser.add_argument('--ignore-wikicfp', action='store_true', help='Ignore information from Wikicfp.')
-    parser.add_argument('--ignore-ggs', action='store_true', help='Ignore information from GII-GRIN-SCIE (GGS) Conference Rating.')
     parser.add_argument('--show-extra', action='store_true', help='Show extra columns')
     parser.add_argument('--ref-source', type=str, default="all", choices=["core", "ggs", "all"], help='Reference source for the LEFT JOIN (all=outer join)')
     parser.add_argument('--in-time', action='store_true', help='Show only conferences where the deadline has not passed')
-    parser.add_argument('--sort-by-rating', action='store_true', help='Sort conferences by rating')
 
     # Pars vars
     args = parser.parse_args()
@@ -446,9 +450,8 @@ def main():
     # Run
     search4papers(force_download=args.force_download, output_file=args.output_file,
                   keywords=keywords, nokeywords=nokeywords, whitelist=whitelist, blacklist=blacklist, ratings=ratings,
-                  ignore_wikicfp=args.ignore_wikicfp, ignore_ggs=args.ignore_ggs,
+                  ignore_wikicfp=False, ignore_ggs=False,
                   in_time=args.in_time, show_extra=args.show_extra, ref_source=args.ref_source,
-                  sort_by_rating=args.sort_by_rating
                   )
 
 
